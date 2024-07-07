@@ -9,7 +9,7 @@ interface Data {
 
 interface ChildProps {
     data: Data[] | null;
-    // filteredItems: [];
+
     loading: boolean;
 }
 
