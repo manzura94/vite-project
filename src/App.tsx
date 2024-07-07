@@ -43,7 +43,7 @@ class App extends Component<{}, State> {
             localStorage.setItem('searchItem', trimSearchItem);
             this.filterItems(trimSearchItem);
         });
-        // this.setState({ searchItem: trimSearchItem });
+
     }
 
     componentDidMount() {
