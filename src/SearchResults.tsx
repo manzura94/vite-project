@@ -1,42 +1,66 @@
-import React, { Component } from 'react';
+import React from 'react';
 import './App.css';
 
 interface SearchResultsProps {
   recentSearches: string[];
   showRecentSearches: boolean;
-  onRecentSearchClick: (searchTerm: string) => void;
+  handleRecentSearchClick: (query: string) => void;
 }
+export const SearchResults = ({
+  showRecentSearches,
+  recentSearches,
+  handleRecentSearchClick,
+}: SearchResultsProps) => {
+  return (
+    <div className="result_container">
+      {showRecentSearches && (
+        <div className="recent_searches_panel">
+          {recentSearches.map((search, index) => (
+            <div
+              key={index}
+              className="recent_search_item"
+              onClick={() => handleRecentSearchClick(search)}
+              // onMouseDown={() => this.handleRecentSearchClick(search)}
+            >
+              {search}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
-class SearchResults extends Component<SearchResultsProps> {
-  constructor(props: SearchResultsProps) {
-    super(props);
-    this.handleRecentSearchClick = this.handleRecentSearchClick.bind(this);
-  }
+// class SearchResults extends Component<SearchResultsProps> {
+//   constructor(props: SearchResultsProps) {
+//     super(props);
+//     this.handleRecentSearchClick = this.handleRecentSearchClick.bind(this);
+//   }
 
-  handleRecentSearchClick(searchTerm: string) {
-    this.props.onRecentSearchClick(searchTerm);
-  }
-  render(): React.ReactNode {
-    const { recentSearches, showRecentSearches } = this.props;
+//   handleRecentSearchClick(searchTerm: string) {
+//     this.props.onRecentSearchClick(searchTerm);
+//   }
+//   render(): React.ReactNode {
+//     const { recentSearches, showRecentSearches } = this.props;
 
-    return (
-      <div className="result_container">
-        {showRecentSearches && (
-          <div className="recent_searches_panel">
-            {recentSearches.map((search, index) => (
-              <div
-                key={index}
-                className="recent_search_item"
-                onMouseDown={() => this.handleRecentSearchClick(search)}
-              >
-                {search}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
-}
+//     return (
+//       <div className="result_container">
+//         {showRecentSearches && (
+//           <div className="recent_searches_panel">
+//             {recentSearches.map((search, index) => (
+//               <div
+//                 key={index}
+//                 className="recent_search_item"
+//                 onMouseDown={() => this.handleRecentSearchClick(search)}
+//               >
+//                 {search}
+//               </div>
+//             ))}
+//           </div>
+//         )}
+//       </div>
+//     );
+//   }
+// }
 
-export default SearchResults;
+// export default SearchResults;
