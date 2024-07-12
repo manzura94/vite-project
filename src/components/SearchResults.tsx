@@ -1,12 +1,12 @@
 import React from 'react';
-import './App.css';
+import '../App.css';
 
 interface SearchResultsProps {
   recentSearches: string[];
   showRecentSearches: boolean;
   handleRecentSearchClick: (query: string) => void;
 }
-export const SearchResults = ({
+const SearchResults = ({
   showRecentSearches,
   recentSearches,
   handleRecentSearchClick,
@@ -30,6 +30,8 @@ export const SearchResults = ({
     </div>
   );
 };
+
+export default SearchResults;
 
 // class SearchResults extends Component<SearchResultsProps> {
 //   constructor(props: SearchResultsProps) {

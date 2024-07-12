@@ -1,19 +1,18 @@
 import React from 'react';
-import './App.css';
-import icon from './assets/icons-search.svg';
+import '../App.css';
+import icon from '../assets/icons-search.svg';
 
 interface ChildProps {
   searchItem: string;
-  // onSearchChange: (searchTerm: string) => void;
+
   setSearchItem: React.Dispatch<React.SetStateAction<string>>;
   handleSearch: (query: string) => Promise<void>;
   handleInputFocus: () => void;
   handleInputBlur: () => void;
-  // onInputFocus: () => void;
-  // onInputBlur: () => void;
+  Layout: () => void;
 }
 
-export const SearchBar = ({
+const SearchBar = ({
   searchItem,
   handleSearch,
   setSearchItem,
@@ -44,6 +43,8 @@ export const SearchBar = ({
     </div>
   );
 };
+
+export default SearchBar;
 
 // class SearchBar extends Component<ChildProps> {
 //   constructor(props: ChildProps) {

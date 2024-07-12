@@ -1,6 +1,5 @@
-import React, { useEffect } from 'react';
-
-import './App.css';
+import { Link, NavLink } from 'react-router-dom';
+import '../App.css';
 
 interface Data {
   uid: string;
@@ -23,15 +22,20 @@ export const Menu = ({ data, loading }: ChildProps) => {
         <div className="menu_loading">Loading...</div>
       ) : (
         <div className="menu_container">
-          {data &&
-            data.map((item) => {
+          {data && data.length ? (
+            data.slice(0, 12).map((item) => {
               return (
                 <div className="menu_wrapper" key={item.uid}>
-                  <p className="menu_title">{item.title}</p>
-                  <p className="menu_desc">{item.publishedYear}</p>
+                  <NavLink state={item} to={`/details/${item.uid}`}>
+                    <p className="menu_title">{item.title}</p>
+                    <p className="menu_desc">{item.publishedYear}</p>
+                  </NavLink>
                 </div>
               );
-            })}
+            })
+          ) : (
+            <div>no result found</div>
+          )}
         </div>
       )}
     </>
