@@ -1,5 +1,7 @@
-import { Link, NavLink } from 'react-router-dom';
+import { useEffect } from 'react';
+import { NavLink, useSearchParams } from 'react-router-dom';
 import '../App.css';
+import { Pagination } from './Pagination.js';
 
 interface Data {
   uid: string;
@@ -13,20 +15,67 @@ interface Data {
 interface ChildProps {
   data: Data[] | null;
   loading: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setData: React.Dispatch<React.SetStateAction<Data[] | null>>;
+  containerRef: React.RefObject<HTMLDivElement> | undefined;
+  setDisplay: React.Dispatch<React.SetStateAction<boolean>>;
+  handleLeftSectionClick: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-export const Menu = ({ data, loading }: ChildProps) => {
+export const Menu = ({
+  data,
+  loading,
+  setData,
+  setLoading,
+  containerRef,
+  setDisplay,
+  handleLeftSectionClick,
+}: ChildProps) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+
+  const fetchItems = async (page: number) => {
+    setLoading(true);
+    const response = await fetch(
+      `https://stapi.co/api/v2/rest/book/search?pageNumber=${page}&pageSize=9`,
+    );
+    const data = await response.json();
+
+    setData(data.books);
+    setLoading(false);
+    console.log(data, 'daya');
+  };
+
+  const handlePageChange = (page: number) => {
+    setSearchParams({ page: page.toString() });
+    setDisplay(false);
+  };
+
+  useEffect(() => {
+    fetchItems(currentPage);
+  }, [currentPage]);
+
   return (
-    <>
+    <div className="menu" ref={containerRef} onClick={handleLeftSectionClick}>
       {loading ? (
         <div className="menu_loading">Loading...</div>
       ) : (
-        <div className="menu_container">
+        <div
+          className="menu_container"
+          ref={containerRef}
+          onClick={handleLeftSectionClick}
+        >
           {data && data.length ? (
-            data.slice(0, 12).map((item) => {
+            data.map((item) => {
               return (
                 <div className="menu_wrapper" key={item.uid}>
-                  <NavLink state={item} to={`/details/${item.uid}`}>
+                  <NavLink
+                    className={({ isActive }) =>
+                      isActive ? 'nav-link active-link' : 'nav-link'
+                    }
+                    state={item}
+                    to={`/details/${item.uid}`}
+                  >
                     <p className="menu_title">{item.title}</p>
                     <p className="menu_desc">{item.publishedYear}</p>
                   </NavLink>
@@ -38,32 +87,11 @@ export const Menu = ({ data, loading }: ChildProps) => {
           )}
         </div>
       )}
-    </>
+      <Pagination
+        currentPage={currentPage}
+        loading={loading}
+        handlePageChange={handlePageChange}
+      />
+    </div>
   );
 };
-
-// class Menu extends Component<ChildProps> {
-//   render() {
-//     const { data, loading } = this.props;
-
-//     if (loading) {
-//       return <div className="menu_loading">Loading...</div>;
-//     }
-
-//     return (
-//       <div className="menu_container">
-//         {data &&
-//           data.map((item) => {
-//             return (
-//               <div className="menu_wrapper" key={item.episode_id}>
-//                 <p className="menu_title">{item.title}</p>
-//                 <p className="menu_desc">{item.opening_crawl}</p>
-//               </div>
-//             );
-//           })}
-//       </div>
-//     );
-//   }
-// }
-
-// export default Menu;

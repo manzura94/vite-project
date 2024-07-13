@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import '../App.css';
 import { Menu } from './Menu.js';
-import SearchBar from './SearchBar.js';
 import axios, { AxiosResponse } from 'axios';
-import SearchResults from './SearchResults.js';
 import ItemView from './ItemView.js';
+import Layout from './Layout.js';
 
 interface Data {
   uid: string;
@@ -17,10 +16,13 @@ interface Data {
 
 const Home = () => {
   const [data, setData] = useState<Data[] | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [showRecentSearches, setShowRecentSearches] = useState<boolean>(false);
   const [searchItem, setSearchItem] = useState<string>('');
   const [error, setError] = useState<boolean>(false);
+  const [display, setDisplay] = useState<boolean>(false);
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   let savedRecentSearches: string[] = JSON.parse(
     localStorage.getItem('recentSearches') || '[]',
@@ -30,7 +32,7 @@ const Home = () => {
     setLoading(true);
     try {
       const response: AxiosResponse<{ books: Data[] }> = await axios.get(
-        'https://stapi.co/api/v2/rest/book/search',
+        'https://stapi.co/api/v2/rest/book/search?pageSize=8',
       );
       const { books } = response.data;
       const data = books;
@@ -44,7 +46,7 @@ const Home = () => {
   };
 
   const handleSearch = async (query: string) => {
-    if (query.length) {
+    if (query.length > 0) {
       try {
         const response: AxiosResponse<{ books: Data[] }> = await axios.post(
           `https://stapi.co/api/v2/rest/book/search?title=${query}`,
@@ -59,7 +61,6 @@ const Home = () => {
 
       if (!savedRecentSearches.includes(searchItem)) {
         savedRecentSearches = [searchItem, ...savedRecentSearches].slice(0, 10);
-        // this.setState({ recentSearches });
         localStorage.setItem(
           'recentSearches',
           JSON.stringify(savedRecentSearches),
@@ -85,13 +86,19 @@ const Home = () => {
     setSearchItem(query);
   };
 
+  const handleLeftSectionClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.target === containerRef?.current) {
+      setDisplay(false);
+    }
+  };
+
   const throwError = () => {
     setError(true);
     throw new Error('Test error!');
   };
 
   useEffect(() => {
-    setLoading(false);
+    setLoading(true);
     fetchData();
   }, [searchItem]);
 
@@ -101,22 +108,39 @@ const Home = () => {
         <h1>Something went wrong. Please try again later.</h1>
       ) : (
         <div className="wrapper">
-          <button onClick={throwError}>Throw Error</button>
-
-          <SearchBar
+          <button className="throw-error" onClick={throwError}>
+            Throw Error
+          </button>
+          <Layout
             handleSearch={handleSearch}
             searchItem={searchItem}
             setSearchItem={setSearchItem}
             handleInputFocus={handleInputFocus}
             handleInputBlur={handleInputBlur}
-          />
-          <SearchResults
             showRecentSearches={showRecentSearches}
             recentSearches={savedRecentSearches}
             handleRecentSearchClick={handleRecentSearchClick}
           />
-          <Menu loading={loading} data={data} />
-          <ItemView />
+          <div
+            className="flex_container"
+            ref={containerRef}
+            onClick={handleLeftSectionClick}
+          >
+            <Menu
+              loading={loading}
+              data={data}
+              setData={setData}
+              setLoading={setLoading}
+              containerRef={containerRef}
+              setDisplay={setDisplay}
+              handleLeftSectionClick={handleLeftSectionClick}
+            />
+            <ItemView
+              containerRef={containerRef}
+              display={display}
+              setDisplay={setDisplay}
+            />
+          </div>
         </div>
       )}
     </div>
@@ -124,131 +148,3 @@ const Home = () => {
 };
 
 export default Home;
-
-// class App extends Component<object, State> {
-//   constructor(props: object) {
-//     super(props);
-//     const savedSearchItem = localStorage.getItem('searchItem') || '';
-//     const savedRecentSearches = JSON.parse(
-//       localStorage.getItem('recentSearches') || '[]',
-//     );...
-
-//     this.state = {
-//       data: null,
-//       filteredItems: [],
-//       searchItem: savedSearchItem,
-//       loading: false,
-//       recentSearches: savedRecentSearches,
-//       showRecentSearches: false,
-//     };....
-
-//     this.handleSearchChange = this.handleSearchChange.bind(this);
-//     this.handleSearch = this.handleSearch.bind(this);
-//     this.handleInputFocus = this.handleInputFocus.bind(this);
-//     this.handleInputBlur = this.handleInputBlur.bind(this);
-//     this.addToRecentSearches = this.addToRecentSearches.bind(this);
-//   }
-
-//   handleSearchChange(searchItem: string) {
-//     this.setState({ searchItem, showRecentSearches: searchItem.length > 0 });
-//   }
-
-//   handleSearch() {
-//     const trimSearchItem = this.state.searchItem.trim();
-//     this.setState(
-//       { searchItem: trimSearchItem, showRecentSearches: false },
-//       () => {
-//         localStorage.setItem('searchItem', trimSearchItem);
-//         this.addToRecentSearches(trimSearchItem);
-
-//         this.filterItems(trimSearchItem);
-//       },
-//     );
-//   }...
-
-//   handleInputFocus() {
-//     if (this.state.searchItem.length > 0) {
-//       this.setState({ showRecentSearches: true });
-//     }
-//   }...
-
-//   handleInputBlur() {
-//     setTimeout(() => this.setState({ showRecentSearches: false }), 200);
-//   }
-
-//   addToRecentSearches(searchItem: string) {
-//     let { recentSearches } = this.state;
-//     if (!recentSearches.includes(searchItem)) {
-//       recentSearches = [searchItem, ...recentSearches].slice(0, 10);
-//       this.setState({ recentSearches });
-//       localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
-//     }
-//   }....
-
-//   throwError() {
-//     throw new Error('Test error!');
-//   }...
-
-//   componentDidMount() {
-//     this.fetchData();
-//   }...
-
-//   async fetchData() {
-//     this.setState({ loading: true });
-//     try {
-//       const response = await fetch('https://swapi.dev/api/films/');
-//       if (!response.ok) {
-//         throw new Error(`HTTP error! status: ${response.status}`);
-//       }
-//       const items = await response.json();
-//       const data: Data[] = items.results;
-//       this.setState({ data: data, loading: false }, () => {
-//         this.filterItems(this.state.searchItem);
-//         console.log(this.state.data, 'fetching');
-//       });
-//     } catch (error) {
-//       this.setState({ loading: false });
-//     }
-//   }....
-
-//   filterItems(searchItem: string) {
-//     const { data } = this.state;
-//     const filteredItems = searchItem
-//       ? data &&
-//         data.filter((item) => item.title.toLowerCase().includes(searchItem))
-//       : data;
-//     this.setState({ filteredItems });
-//   }....
-
-//   render() {
-//     // const {
-//     //   loading,
-//     //   searchItem,
-//     //   filteredItems,
-//     //   recentSearches,
-//     //   showRecentSearches,
-//     // } = this.state;
-
-//     return (
-//       <div className="wrapper">
-//         {/* <button onClick={this.throwError}>Throw Error</button> */}
-// hello world
-//         {/* <SearchBar
-//           searchItem={searchItem}
-//           onSearchChange={this.handleSearchChange}
-//           onSearch={this.handleSearch}
-//           onInputFocus={this.handleInputFocus}
-//           onInputBlur={this.handleInputBlur}
-//         />
-//         <SearchResults
-//           recentSearches={recentSearches}
-//           showRecentSearches={showRecentSearches}
-//           onRecentSearchClick={this.handleSearchChange}
-//         />
-//         <Menu data={filteredItems} loading={loading} /> */}
-//       </div>
-//     );
-//   }
-// }
-
-// export default App;
