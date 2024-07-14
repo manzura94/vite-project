@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import '../App.css';
 import { Menu } from './Menu.js';
 import axios, { AxiosResponse } from 'axios';
@@ -14,6 +14,8 @@ interface Data {
   publishedDay: number;
 }
 
+
+
 const Home = () => {
   const [data, setData] = useState<Data[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -24,11 +26,11 @@ const Home = () => {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  let savedRecentSearches: string[] = JSON.parse(
-    localStorage.getItem('recentSearches') || '[]',
+  const savedRecentSearches = useRef<string[]>(
+    JSON.parse(localStorage.getItem('recentSearches') || '[]'),
   );
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const response: AxiosResponse<{ books: Data[] }> = await axios.get(
@@ -43,34 +45,43 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [setLoading, setData]);
 
-  const handleSearch = async (query: string) => {
-    if (query.length > 0) {
-      try {
-        const response: AxiosResponse<{ books: Data[] }> = await axios.post(
-          `https://stapi.co/api/v2/rest/book/search?title=${query}`,
-        );
+  const handleSearch = useCallback(
+    async (query: string) => {
+      if (query.length > 0) {
+        setLoading(true);
+        try {
+          const response: AxiosResponse<{ books: Data[] }> = await axios.post(
+            `https://stapi.co/api/v2/rest/book/search?title=${query}`,
+          );
 
-        const { books } = response.data;
-        const data = books;
-        setData(data);
-      } catch (error) {
-        console.error('Error searching items:', error);
+          const { books } = response.data;
+          const data = books;
+          setData(data);
+        } catch (error) {
+          console.error('Error searching items:', error);
+        } finally {
+          setLoading(false);
+        }
+
+        if (!savedRecentSearches.current.includes(query)) {
+          savedRecentSearches.current = [
+            query,
+            ...savedRecentSearches.current,
+          ].slice(0, 10);
+          localStorage.setItem(
+            'recentSearches',
+            JSON.stringify(savedRecentSearches.current),
+          );
+        }
       }
-
-      if (!savedRecentSearches.includes(searchItem)) {
-        savedRecentSearches = [searchItem, ...savedRecentSearches].slice(0, 10);
-        localStorage.setItem(
-          'recentSearches',
-          JSON.stringify(savedRecentSearches),
-        );
-      }
-    }
-  };
+    },
+    [setData, setLoading],
+  );
 
   const handleInputFocus = () => {
-    if (savedRecentSearches.length) {
+    if (savedRecentSearches.current.length) {
       setShowRecentSearches(true);
     }
   };
@@ -100,7 +111,7 @@ const Home = () => {
   useEffect(() => {
     setLoading(true);
     fetchData();
-  }, [searchItem]);
+  }, [fetchData]);
 
   return (
     <div>
@@ -118,7 +129,7 @@ const Home = () => {
             handleInputFocus={handleInputFocus}
             handleInputBlur={handleInputBlur}
             showRecentSearches={showRecentSearches}
-            recentSearches={savedRecentSearches}
+            recentSearches={savedRecentSearches.current}
             handleRecentSearchClick={handleRecentSearchClick}
           />
           <div
@@ -133,6 +144,7 @@ const Home = () => {
               setLoading={setLoading}
               containerRef={containerRef}
               setDisplay={setDisplay}
+            
               handleLeftSectionClick={handleLeftSectionClick}
             />
             <ItemView

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios, { AxiosResponse } from 'axios';
 
@@ -17,7 +17,7 @@ interface ItemProps {
   setDisplay: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const ItemView = ({ containerRef, display, setDisplay }: ItemProps) => {
+const ItemView = ({ display, setDisplay }: ItemProps) => {
   const location = useLocation();
   const pathname = location.pathname;
   const id = pathname.split('/').pop();
@@ -26,7 +26,7 @@ const ItemView = ({ containerRef, display, setDisplay }: ItemProps) => {
 
   const navigate = useNavigate();
 
-  const handleViewItem = async () => {
+  const handleViewItem = useCallback(async () => {
     if (id) {
       try {
         const response: AxiosResponse<{ book: Detail }> = await axios.get(
@@ -39,7 +39,7 @@ const ItemView = ({ containerRef, display, setDisplay }: ItemProps) => {
         console.error('Error searching items:', error);
       }
     }
-  };
+  }, [id, setDisplay]);
 
   const handleClose = () => {
     setDisplay(false);
@@ -49,7 +49,7 @@ const ItemView = ({ containerRef, display, setDisplay }: ItemProps) => {
 
   useEffect(() => {
     handleViewItem();
-  }, [id]);
+  }, [handleViewItem]);
 
   return (
     <>

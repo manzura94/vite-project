@@ -45,6 +45,13 @@
   text-align: center;
 }
 
+.noresult-found {
+  min-height: 100vh;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+}
+
 .throw-error {
   padding: 15px;
   border-color: rgb(250, 5, 5);

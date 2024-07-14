@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { NavLink, useSearchParams } from 'react-router-dom';
 import '../App.css';
 import { Pagination } from './Pagination.js';
@@ -32,19 +32,23 @@ export const Menu = ({
   handleLeftSectionClick,
 }: ChildProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
+
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
 
-  const fetchItems = async (page: number) => {
-    setLoading(true);
-    const response = await fetch(
-      `https://stapi.co/api/v2/rest/book/search?pageNumber=${page}&pageSize=9`,
-    );
-    const data = await response.json();
+  const fetchItems = useCallback(
+    async (page: number) => {
+      setLoading(true);
+      const response = await fetch(
+        `https://stapi.co/api/v2/rest/book/search?pageNumber=${page}&pageSize=9`,
+      );
+      const data = await response.json();
 
-    setData(data.books);
-    setLoading(false);
-    console.log(data, 'daya');
-  };
+      setData(data.books);
+      setLoading(false);
+      console.log(data, 'data');
+    },
+    [setData, setLoading],
+  );
 
   const handlePageChange = (page: number) => {
     setSearchParams({ page: page.toString() });
@@ -53,7 +57,7 @@ export const Menu = ({
 
   useEffect(() => {
     fetchItems(currentPage);
-  }, [currentPage]);
+  }, [fetchItems, currentPage]);
 
   return (
     <div className="menu" ref={containerRef} onClick={handleLeftSectionClick}>
@@ -66,7 +70,7 @@ export const Menu = ({
           onClick={handleLeftSectionClick}
         >
           {data && data.length ? (
-            data.map((item) => {
+            data.slice(0, 9).map((item) => {
               return (
                 <div className="menu_wrapper" key={item.uid}>
                   <NavLink
@@ -83,15 +87,18 @@ export const Menu = ({
               );
             })
           ) : (
-            <div>no result found</div>
+            <div className="noresult-found">no result found</div>
           )}
         </div>
       )}
-      <Pagination
-        currentPage={currentPage}
-        loading={loading}
-        handlePageChange={handlePageChange}
-      />
+      {!data ||
+        (data.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            loading={loading}
+            handlePageChange={handlePageChange}
+          />
+        ))}
     </div>
   );
 };

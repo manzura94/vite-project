@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface PagiPros {
   loading: boolean;
   handlePageChange: (page: number) => void;

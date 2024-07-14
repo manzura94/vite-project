@@ -10,6 +10,8 @@ const SearchResults = ({
   recentSearches,
   handleRecentSearchClick,
 }: SearchResultsProps) => {
+  console.log(recentSearches);
+
   return (
     <div className="result_container">
       {showRecentSearches && (

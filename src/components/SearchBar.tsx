@@ -24,7 +24,7 @@ const SearchBar = ({
           <input
             className="search_input"
             type={'text'}
-            placeholder="type to search..."
+            placeholder="Search..."
             value={searchItem}
             onChange={(e) => setSearchItem(e.target.value)}
             onFocus={handleInputFocus}
