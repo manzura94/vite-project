@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Ignore the Desktop/redux directory
+Desktop/redux/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
