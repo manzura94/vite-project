@@ -4,8 +4,8 @@ import { http, HttpResponse } from 'msw';
 import { renderHook, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
-import { expect, test, vi } from 'vitest';
-import { booksApi, Book } from '../api/booksApi.js'; 
+import { expect, test } from 'vitest';
+import { booksApi} from '../api/booksApi.js'; 
 import { store } from '../app/store.js';
 
 
